@@ -58,6 +58,9 @@ interface Grupo {
                       <p class="muted es">{{ fila.ejemplo_espanol }}</p>
                     }
                     <p class="muted small est">{{ fila.estructura }}</p>
+                    @if (fila.nota) {
+                      <p class="small nota">{{ fila.nota }}</p>
+                    }
                   </div>
                 </div>
               }
@@ -111,6 +114,12 @@ interface Grupo {
     }
     .est {
       margin-top: 2px;
+    }
+    .nota {
+      margin-top: 4px;
+      padding: 4px 10px;
+      border-left: 4px solid var(--mark);
+      background: var(--ink-soft);
     }
   `,
 })

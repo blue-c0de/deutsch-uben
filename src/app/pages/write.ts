@@ -5,6 +5,7 @@ import { SettingsService } from '../services/settings.service';
 import { SpeechService } from '../services/speech.service';
 import { StudyService } from '../services/study.service';
 import { GermanWord } from '../shared/german-word';
+import { PracticeSwitch } from '../shared/practice-switch';
 import {
   LANG_NAME,
   TIPO_SING,
@@ -21,8 +22,9 @@ import {
 
 @Component({
   selector: 'app-write',
-  imports: [GermanWord, RouterLink],
+  imports: [GermanWord, RouterLink, PracticeSwitch],
   template: `
+    <app-practice-switch />
     @if (session().length === 0) {
       <section class="panel stack">
         <h2>No hay fichas para escribir</h2>

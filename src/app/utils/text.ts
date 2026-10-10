@@ -113,7 +113,7 @@ export function germanCandidates(target: string): string[] {
  * Evalúa una respuesta escrita en alemán.
  * `useArticle`: si es true y la respuesta correcta lleva artículo, se avisa cuando falta o es incorrecto.
  */
-export function judgeGerman(input: string, target: string, useArticle = true): Verdict {
+export function judgeGerman(input: string, target: string, useArticle = true, tolerant = true): Verdict {
   const i = foldGerman(input);
   if (!i) return 'ko';
   const cands = germanCandidates(target);
@@ -128,7 +128,7 @@ export function judgeGerman(input: string, target: string, useArticle = true): V
       if (u.article && foldGerman(u.rest) === stem) return 'article';
     }
   }
-  return withinTypo(i, cands) ? 'typo' : 'ko';
+  return tolerant && withinTypo(i, cands) ? 'typo' : 'ko';
 }
 
 export function translationCandidates(text: string, lang: Lang): string[] {
@@ -195,4 +195,92 @@ export function breakable(text: string): string {
 /** Tamaño de letra según la longitud del texto: l (corto), m, s (largo). */
 export function sizeFor(text: string): 'l' | 'm' | 's' {
   return text.length > 24 ? 's' : text.length > 12 ? 'm' : 'l';
+}
+
+/** Normaliza la respuesta de una celda de tabla: sin guiones ni «+», y abreviaturas de los casos. */
+function foldCell(s: string): string {
+  return foldGerman(s)
+    .replace(/[+\-–—]/g, ' ')
+    .replace(/\bakkusativ\b/g, 'akk')
+    .replace(/\bdativ\b/g, 'dat')
+    .replace(/\bgenitiv\b/g, 'gen')
+    .replace(/\bwechsel(praeposition)?\b/g, 'wechsel')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/** Compara lo que escribe la persona con el contenido de una celda de una tabla de gramática. */
+export function judgeCell(input: string, answer: string): boolean {
+  const a = foldCell(answer);
+  const i = foldCell(input);
+  if (!i) return false;
+  if (i === a) return true;
+  // Abreviaturas: «akk» para «Akkusativ», pero solo si la respuesta es un nombre de caso largo.
+  return i.length >= 3 && a.length > 4 && a.startsWith(i) && /^(akk|dat|gen|nom)/.test(a);
+}
+
+/** Terminaciones que casi siempre delatan el género (hay excepciones). */
+const GENDER_RULES: [string, 'der' | 'die' | 'das'][] = [
+  ['schaft', 'die'], ['heit', 'die'], ['keit', 'die'], ['ung', 'die'], ['tät', 'die'], ['ion', 'die'], ['ik', 'die'],
+  ['ismus', 'der'], ['ling', 'der'],
+  ['chen', 'das'], ['lein', 'das'], ['ment', 'das'], ['tum', 'das'],
+];
+export function genderRule(noun: string): { suffix: string; art: 'der' | 'die' | 'das' } | null {
+  const w = noun.toLowerCase();
+  for (const [suf, art] of GENDER_RULES) if (w.endsWith(suf)) return { suffix: '-' + suf, art };
+  return null;
+}
+
+/* ---------- Frases (Redemittel) ---------- */
+
+/** Palabras de una frase, sin los puntos suspensivos y con «a / b» unido como «a/b». */
+export function phraseTokens(p: string): string[] {
+  return p
+    .replace(/\s*\/\s*/g, '/')
+    .replace(/…|\.{2,}/g, ' ')
+    .split(/\s+/)
+    .filter(Boolean);
+}
+
+/** Formas aceptables de una frase: elige una opción de «a/b», y lo que va entre paréntesis es opcional. */
+export function phraseVariants(p: string): string[] {
+  let variants: string[][] = [[]];
+  for (const t of phraseTokens(p)) {
+    let alts: string[];
+    const opt = /^\((.+)\)$/.exec(t.replace(/[,.;:!?]+$/g, ''));
+    if (opt) alts = [opt[1], ''];
+    else if (t.includes('/')) {
+      const parts = t.split('/').filter(Boolean);
+      alts = parts.length === 2 && /^in(nen)?[,.;:!?]*$/.test(parts[1]) ? [parts[0], parts[0] + parts[1]] : parts;
+    } else alts = [t];
+    variants = variants.flatMap((v) => alts.map((a) => (a ? [...v, a] : v))).slice(0, 12);
+  }
+  // También vale copiar el texto tal cual, con todas las opciones («finde/glaube/meine»).
+  return [...new Set([...variants.map((v) => foldGerman(v.join(' '))), foldGerman(p)].filter(Boolean))];
+}
+
+/** Evalúa una frase escrita de memoria. */
+export function judgePhrase(input: string, phrase: string): Verdict {
+  const i = foldGerman(input);
+  if (!i) return 'ko';
+  const vs = phraseVariants(phrase);
+  if (vs.includes(i)) return 'ok';
+  return vs.some((v) => levenshtein(i, v) <= Math.max(1, Math.floor(v.length / 12))) ? 'typo' : 'ko';
+}
+
+/** La frase con la palabra clave sustituida por un hueco; null si la clave no aparece. */
+export function cloze(phrase: string, clave: string): string | null {
+  const esc = clave.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const rx = new RegExp(`(?<![\\p{L}])${esc}(?![\\p{L}])`, 'iu');
+  return rx.test(phrase) ? phrase.replace(rx, '_____') : null;
+}
+
+/** Pista: las primeras letras de cada palabra («I__ f___ e_ …»). */
+export function initialsMask(phrase: string, shown: number): string {
+  return phraseTokens(phrase)
+    .map((w) => {
+      let n = 0;
+      return [...w].map((ch) => (/[\p{L}]/u.test(ch) ? (++n <= shown ? ch : '_') : ch)).join('');
+    })
+    .join(' ');
 }

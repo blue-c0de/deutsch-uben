@@ -13,6 +13,10 @@ export const DEFAULT_SETTINGS: Settings = {
   autoSpeak: false,
   includeReview: true,
   theme: 'auto',
+  leccion: 'todas',
+  tema: 'todos',
+  subtipo: 'todos',
+  categoria: 'todas',
 };
 
 @Injectable({ providedIn: 'root' })
