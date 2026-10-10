@@ -113,7 +113,7 @@ export function germanCandidates(target: string): string[] {
  * Evalúa una respuesta escrita en alemán.
  * `useArticle`: si es true y la respuesta correcta lleva artículo, se avisa cuando falta o es incorrecto.
  */
-export function judgeGerman(input: string, target: string, useArticle = true): Verdict {
+export function judgeGerman(input: string, target: string, useArticle = true, tolerant = true): Verdict {
   const i = foldGerman(input);
   if (!i) return 'ko';
   const cands = germanCandidates(target);
@@ -128,7 +128,7 @@ export function judgeGerman(input: string, target: string, useArticle = true): V
       if (u.article && foldGerman(u.rest) === stem) return 'article';
     }
   }
-  return withinTypo(i, cands) ? 'typo' : 'ko';
+  return tolerant && withinTypo(i, cands) ? 'typo' : 'ko';
 }
 
 export function translationCandidates(text: string, lang: Lang): string[] {
@@ -195,4 +195,26 @@ export function breakable(text: string): string {
 /** Tamaño de letra según la longitud del texto: l (corto), m, s (largo). */
 export function sizeFor(text: string): 'l' | 'm' | 's' {
   return text.length > 24 ? 's' : text.length > 12 ? 'm' : 'l';
+}
+
+/** Normaliza la respuesta de una celda de tabla: sin guiones ni «+», y abreviaturas de los casos. */
+function foldCell(s: string): string {
+  return foldGerman(s)
+    .replace(/[+\-–—]/g, ' ')
+    .replace(/\bakkusativ\b/g, 'akk')
+    .replace(/\bdativ\b/g, 'dat')
+    .replace(/\bgenitiv\b/g, 'gen')
+    .replace(/\bwechsel(praeposition)?\b/g, 'wechsel')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/** Compara lo que escribe la persona con el contenido de una celda de una tabla de gramática. */
+export function judgeCell(input: string, answer: string): boolean {
+  const a = foldCell(answer);
+  const i = foldCell(input);
+  if (!i) return false;
+  if (i === a) return true;
+  // Abreviaturas: «akk» para «Akkusativ», pero solo si la respuesta es un nombre de caso largo.
+  return i.length >= 3 && a.length > 4 && a.startsWith(i) && /^(akk|dat|gen|nom)/.test(a);
 }

@@ -251,6 +251,10 @@ a {
   background: var(--mark);
   color: var(--mark-on);
 }
+.seg-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+}
 .seg-sm button {
   min-height: 36px;
   padding: 0.25em 0.7em;

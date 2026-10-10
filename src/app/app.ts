@@ -1,5 +1,7 @@
-import { Component, effect, inject } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Component, computed, effect, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { filter, map } from 'rxjs';
 import { Lang } from './models';
 import { DataService } from './services/data.service';
 import { SettingsService } from './services/settings.service';
@@ -31,23 +33,23 @@ import { SettingsService } from './services/settings.service';
           </span>
           <span>Tarjetas</span>
         </a>
-        <a routerLink="/test" routerLinkActive="on">
+        <a routerLink="/test" [class.on]="practiceActive()">
           <span class="ic">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6l2 2 3-3" /><path d="M12 7h8" /><path d="M4 15l2 2 3-3" /><path d="M12 16h8" /></svg>
           </span>
-          <span>Test</span>
-        </a>
-        <a routerLink="/escribir" routerLinkActive="on">
-          <span class="ic">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l1-4L16 5l3 3L8 19z" /><path d="M14 7l3 3" /></svg>
-          </span>
-          <span>Escribir</span>
+          <span>Practicar</span>
         </a>
         <a routerLink="/palabras" routerLinkActive="on">
           <span class="ic">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h10a3 3 0 013 3v13H8a3 3 0 01-3-3z" /><path d="M5 17a3 3 0 013-3h10" /></svg>
           </span>
           <span>Palabras</span>
+        </a>
+        <a routerLink="/verbos" routerLinkActive="on">
+          <span class="ic">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6h14" /><path d="M5 12h14" /><path d="M5 18h9" /><path d="M17 16l2 2 3-4" /></svg>
+          </span>
+          <span>Verbos</span>
         </a>
         <a routerLink="/gramatica" routerLinkActive="on">
           <span class="ic">
@@ -200,6 +202,17 @@ export class App {
   protected readonly data = inject(DataService);
   private readonly settings = inject(SettingsService);
   protected readonly lang = () => this.settings.state().lang;
+
+  private readonly router = inject(Router);
+  private readonly url = toSignal(
+    this.router.events.pipe(
+      filter((e): e is NavigationEnd => e instanceof NavigationEnd),
+      map((e) => e.urlAfterRedirects),
+    ),
+    { initialValue: this.router.url },
+  );
+  /** «Practicar» agrupa Test y Escribir. */
+  protected readonly practiceActive = computed(() => this.url().startsWith('/test') || this.url().startsWith('/escribir'));
 
   constructor() {
     effect(() => {

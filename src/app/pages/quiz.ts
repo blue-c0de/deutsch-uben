@@ -6,6 +6,7 @@ import { SettingsService } from '../services/settings.service';
 import { SpeechService } from '../services/speech.service';
 import { StudyService } from '../services/study.service';
 import { GermanWord } from '../shared/german-word';
+import { PracticeSwitch } from '../shared/practice-switch';
 import { LANG_NAME, TIPO_SING, breakable, shuffle, sizeFor } from '../utils/text';
 
 interface Question {
@@ -16,8 +17,9 @@ interface Question {
 
 @Component({
   selector: 'app-quiz',
-  imports: [GermanWord, RouterLink],
+  imports: [GermanWord, RouterLink, PracticeSwitch],
   template: `
+    <app-practice-switch />
     @if (questions().length === 0) {
       <section class="panel stack">
         <h2>No hay fichas para el test</h2>

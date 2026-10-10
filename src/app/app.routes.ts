@@ -6,6 +6,7 @@ export const routes: Routes = [
   { path: 'test', title: 'Test – Karteikasten', loadComponent: () => import('./pages/quiz').then((m) => m.Quiz) },
   { path: 'escribir', title: 'Escribir – Karteikasten', loadComponent: () => import('./pages/write').then((m) => m.Write) },
   { path: 'palabras', title: 'Palabras – Karteikasten', loadComponent: () => import('./pages/browse').then((m) => m.Browse) },
+  { path: 'verbos', title: 'Verbos – Karteikasten', loadComponent: () => import('./pages/verbs').then((m) => m.Verbs) },
   { path: 'gramatica', title: 'Gramática – Karteikasten', loadComponent: () => import('./pages/grammar').then((m) => m.Grammar) },
   { path: '**', redirectTo: '' },
 ];

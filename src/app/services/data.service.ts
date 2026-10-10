@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { forkJoin } from 'rxjs';
-import { AktivPassivRow, Card, DeclRow } from '../models';
+import { AktivPassivRow, Card, DeclRow, Verb } from '../models';
 
 @Injectable({ providedIn: 'root' })
 export class DataService {
@@ -10,9 +10,19 @@ export class DataService {
   readonly cards = signal<Card[]>([]);
   readonly aktivPassiv = signal<AktivPassivRow[]>([]);
   readonly deklination = signal<DeclRow[]>([]);
+  readonly verbs = signal<Verb[]>([]);
   readonly status = signal<'cargando' | 'listo' | 'error'>('cargando');
 
   readonly byId = computed(() => new Map(this.cards().map((c) => [c.id, c])));
+
+  /** Ficha de vocabulario → verbo de la hoja «Verbos» (para enlazar al conjugador). */
+  readonly verbByVocabId = computed(() => {
+    const m = new Map<number, Verb>();
+    for (const v of this.verbs()) {
+      for (const id of (v.vocab_ids ?? '').split(',')) if (id) m.set(Number(id), v);
+    }
+    return m;
+  });
 
   constructor() {
     this.cargar();
@@ -24,11 +34,13 @@ export class DataService {
       cards: this.http.get<Card[]>('data/vocabulario.json'),
       ap: this.http.get<AktivPassivRow[]>('data/aktiv-passiv.json'),
       decl: this.http.get<DeclRow[]>('data/deklination.json'),
+      verbs: this.http.get<Verb[]>('data/verbos.json'),
     }).subscribe({
-      next: ({ cards, ap, decl }) => {
+      next: ({ cards, ap, decl, verbs }) => {
         this.cards.set(cards);
         this.aktivPassiv.set(ap);
         this.deklination.set(decl);
+        this.verbs.set(verbs);
         this.status.set('listo');
       },
       error: () => this.status.set('error'),

@@ -32,6 +32,7 @@ export interface Progress {
 
 export interface AktivPassivRow {
   id: number;
+  nota?: string | null;
   modo: string | null;
   tiempo: string | null;
   tipo_verbo: string | null;
@@ -43,6 +44,7 @@ export interface AktivPassivRow {
 
 export interface DeclRow {
   id: number;
+  genero?: string | null;
   nominativ: string | null;
   akkusativ: string | null;
   genitiv: string | null;
@@ -66,4 +68,49 @@ export interface SessionItem {
   card: Card;
   dir: Direction;
   retry: boolean;
+}
+
+/** Fila de la hoja «Verbos»: formas principales de un verbo. Lo que está vacío se calcula con las reglas regulares. */
+export interface Verb {
+  id: number;
+  infinitivo: string; // sin «sich»
+  reflexivo: 'akk' | 'dat' | null;
+  prefijo: string | null; // solo verbos separables
+  presente_ich: string | null;
+  presente_du: string | null;
+  presente_er: string | null;
+  presente_ihr: string | null;
+  preterito: string | null; // forma «ich»
+  konj2: string | null; // forma «ich»
+  participio2: string | null; // completo, con prefijo
+  auxiliar: 'haben' | 'sein' | null;
+  imperativo_du: string | null;
+  tipo: string; // regular, irregular, mixto, modal, auxiliar
+  espanol: string | null;
+  ingles: string | null;
+  nota: string | null;
+  vocab_ids: string | null;
+  origen: string | null;
+  revisar: boolean;
+}
+
+/* ---------- Referencia de gramática ---------- */
+/** Qué columnas se piden al practicar una tabla: se muestra la columna `from` y se pregunta cada una de las de `to`. */
+export interface DrillSpec {
+  from?: number;
+  to?: number[];
+}
+export type Block =
+  | { t: 'p'; text: string }
+  | { t: 'list'; items: string[] }
+  | { t: 'table'; title?: string; head: string[]; rows: string[][]; drill?: DrillSpec | true; genus?: boolean; art?: 'der' | 'die' | 'das' }
+  | { t: 'ex'; items: { de: string; es: string }[] }
+  | { t: 'note'; text: string }
+  | { t: 'warn'; text: string };
+export interface Topic {
+  id: string;
+  grupo: string;
+  titulo: string;
+  resumen: string;
+  blocks: Block[];
 }

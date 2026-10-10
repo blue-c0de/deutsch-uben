@@ -87,6 +87,9 @@ const CASOS: { valor: Caso; texto: string }[] = [
                 }
               }
               <p class="disp solucion"><app-de [text]="q.objetivo" /></p>
+              @if (q.fila.nota) {
+                <p class="muted small">{{ q.fila.nota }}</p>
+              }
               <button type="button" class="btn btn-primary" (click)="siguiente()">Siguiente</button>
             </div>
           }
@@ -111,6 +114,7 @@ const CASOS: { valor: Caso; texto: string }[] = [
                 <th scope="col">Akkusativ</th>
                 <th scope="col">Genitiv</th>
                 <th scope="col">Dativ</th>
+                <th scope="col">Nota</th>
               </tr>
             </thead>
             <tbody>
@@ -120,9 +124,10 @@ const CASOS: { valor: Caso; texto: string }[] = [
                   <td>@if (r.akkusativ) { <app-de [text]="r.akkusativ" /> } @else { <span class="muted">sin dato</span> }</td>
                   <td>@if (r.genitiv) { <app-de [text]="r.genitiv" /> } @else { <span class="muted">sin dato</span> }</td>
                   <td>@if (r.dativ) { <app-de [text]="r.dativ" /> } @else { <span class="muted">sin dato</span> }</td>
+                  <td class="muted small">{{ r.nota }}</td>
                 </tr>
               } @empty {
-                <tr><td colspan="4">No hay sustantivos que coincidan.</td></tr>
+                <tr><td colspan="5">No hay sustantivos que coincidan.</td></tr>
               }
             </tbody>
           </table>
@@ -168,7 +173,7 @@ const CASOS: { valor: Caso; texto: string }[] = [
     }
     table {
       width: 100%;
-      min-width: 560px;
+      min-width: 760px;
       border-collapse: collapse;
     }
     th,

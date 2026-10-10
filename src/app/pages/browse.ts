@@ -1,4 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { Card } from '../models';
 import { DataService } from '../services/data.service';
 import { SettingsService } from '../services/settings.service';
@@ -10,7 +11,7 @@ import { TIPO_SING, breakable, searchFold } from '../utils/text';
 
 @Component({
   selector: 'app-browse',
-  imports: [GermanWord, FiltersComponent],
+  imports: [GermanWord, FiltersComponent, RouterLink],
   template: `
     <div class="stack" style="--gap: 16px">
       <h1>Palabras</h1>
@@ -49,6 +50,9 @@ import { TIPO_SING, breakable, searchFold } from '../utils/text';
               </div>
               <div class="side">
                 <span class="chip">{{ tipo(c) }}</span>
+                @if (conjId(c); as vid) {
+                  <a class="btn btn-quiet" routerLink="/verbos" [queryParams]="{ v: vid }">Conjugar</a>
+                }
                 @if (speech.supported) {
                   <button type="button" class="btn btn-icon btn-quiet" (click)="speech.speak(c.aleman)" [attr.aria-label]="'Escuchar ' + c.aleman">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z" /><path d="M16 9a4 4 0 010 6" /><path d="M18.5 6.5a8 8 0 010 11" /></svg>
@@ -170,6 +174,10 @@ export class Browse {
   protected readonly shown = computed(() => this.results().slice(0, this.limit()));
 
   protected readonly br = breakable;
+
+  protected conjId(c: Card): number | null {
+    return c.tipo === 'verbo' ? (this.data.verbByVocabId().get(c.id)?.id ?? null) : null;
+  }
 
   protected onQuery(e: Event): void {
     this.query.set((e.target as HTMLInputElement).value);
