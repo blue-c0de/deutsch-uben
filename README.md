@@ -24,27 +24,6 @@ Abre http://localhost:4200.
 2. Ejecuta `npm run datos`. Esto regenera los JSON de `public/data/`.
 3. Comprueba el resultado con `npm start`.
 
-Si publicas con GitHub Actions (ver abajo), el paso 2 se hace solo: basta con subir el Excel.
-
-## Publicarla en GitHub Pages
-
-1. Crea un repositorio en GitHub (el nombre que quieras) y sube este proyecto:
-
-   ```bash
-   git init
-   git add .
-   git commit -m "Primera versión"
-   git branch -M main
-   git remote add origin https://github.com/TU_USUARIO/TU_REPOSITORIO.git
-   git push -u origin main
-   ```
-
-2. En GitHub entra en **Settings → Pages**, y en **Build and deployment → Source** elige **GitHub Actions**.
-3. Abre la pestaña **Actions** y espera a que termine «Publicar en GitHub Pages» (1 o 2 minutos).
-4. Tu web estará en `https://TU_USUARIO.github.io/TU_REPOSITORIO/`.
-
-Cada vez que hagas `git push` a `main`, la web se actualiza sola.
-
 ## Cosas que conviene saber
 
 - **El progreso se guarda en el navegador de cada dispositivo.** Para pasarlo de un dispositivo a otro,
