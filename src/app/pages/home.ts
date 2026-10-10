@@ -29,6 +29,8 @@ const CAJAS = [
           <a class="btn btn-primary btn-main" routerLink="/tarjetas">Estudiar con tarjetas</a>
           <a class="btn" routerLink="/test">Hacer un test</a>
           <a class="btn" routerLink="/escribir">Escribir respuestas</a>
+          <a class="btn" routerLink="/articulos">Artículos der, die, das</a>
+          <a class="btn" routerLink="/juegos">Elegir juego y material</a>
           <a class="btn" routerLink="/verbos">Conjugar verbos</a>
           <a class="btn" routerLink="/gramatica">Gramática</a>
         </div>

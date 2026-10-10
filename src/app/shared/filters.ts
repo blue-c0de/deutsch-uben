@@ -30,10 +30,52 @@ import { TIPO_LABEL } from '../utils/text';
 
         <div class="field">
           <label for="f-fuente">Fuente</label>
-          <select id="f-fuente" class="input" (change)="settings.patch({ fuente: val($event) })">
+          <select id="f-fuente" class="input" (change)="settings.patch({ fuente: val($event), leccion: 'todas' })">
             <option value="todas" [selected]="s().fuente === 'todas'">Todas</option>
             @for (f of study.fuentes(); track f) {
               <option [value]="f" [selected]="s().fuente === f">{{ f }}</option>
+            }
+          </select>
+        </div>
+
+        @if (s().fuente === 'Kursbuch' && study.lecciones().length) {
+          <div class="field">
+            <label for="f-leccion">Lección del Kursbuch</label>
+            <select id="f-leccion" class="input" (change)="settings.patch({ leccion: val($event) })">
+              <option value="todas" [selected]="s().leccion === 'todas'">Todo el Kursbuch</option>
+              @for (l of study.lecciones(); track l.id) {
+                <option [value]="l.id" [selected]="s().leccion === l.id">{{ l.label }}</option>
+              }
+            </select>
+          </div>
+        }
+
+        <div class="field">
+          <label for="f-tema">Tema</label>
+          <select id="f-tema" class="input" (change)="settings.patch({ tema: val($event) })">
+            <option value="todos" [selected]="s().tema === 'todos'">Todos los temas</option>
+            @for (t of study.temas(); track t) {
+              <option [value]="t" [selected]="s().tema === t">{{ t }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="f-sub">Detalle (género o tipo de verbo)</label>
+          <select id="f-sub" class="input" (change)="settings.patch({ subtipo: val($event) })">
+            <option value="todos" [selected]="s().subtipo === 'todos'">Todos</option>
+            @for (t of study.subtipos(); track t) {
+              <option [value]="t" [selected]="s().subtipo === t">{{ t }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="f-cat">Categoría de las frases</label>
+          <select id="f-cat" class="input" (change)="settings.patch({ categoria: val($event) })">
+            <option value="todas" [selected]="s().categoria === 'todas'">Todas</option>
+            @for (c of study.categoriasFrase(); track c.categoria) {
+              <option [value]="c.categoria" [selected]="s().categoria === c.categoria">{{ c.espanol ?? c.categoria }} ({{ c.n }})</option>
             }
           </select>
         </div>

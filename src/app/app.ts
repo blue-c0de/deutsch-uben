@@ -33,11 +33,11 @@ import { SettingsService } from './services/settings.service';
           </span>
           <span>Tarjetas</span>
         </a>
-        <a routerLink="/test" [class.on]="practiceActive()">
+        <a routerLink="/juegos" [class.on]="practiceActive()">
           <span class="ic">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6l2 2 3-3" /><path d="M12 7h8" /><path d="M4 15l2 2 3-3" /><path d="M12 16h8" /></svg>
           </span>
-          <span>Practicar</span>
+          <span>Juegos</span>
         </a>
         <a routerLink="/palabras" routerLinkActive="on">
           <span class="ic">
@@ -211,8 +211,8 @@ export class App {
     ),
     { initialValue: this.router.url },
   );
-  /** «Practicar» agrupa Test y Escribir. */
-  protected readonly practiceActive = computed(() => this.url().startsWith('/test') || this.url().startsWith('/escribir'));
+  /** «Juegos» agrupa Test, Escribir y Artículos. */
+  protected readonly practiceActive = computed(() => ['/juegos', '/test', '/escribir', '/articulos', '/frases'].some((r) => this.url().startsWith(r)));
 
   constructor() {
     effect(() => {

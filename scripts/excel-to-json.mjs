@@ -40,6 +40,12 @@ const vocabulario = (await filas('Vocabulario')).map((f) => ({
   seccion: texto(f.seccion),
   nota: texto(f.nota),
   revisar: String(f.revisar ?? '').toLowerCase().startsWith('s'),
+  tema: texto(f.tema),
+  subtipo: texto(f.subtipo),
+  clave: texto(f.clave),
+  ejemplo: texto(f.ejemplo),
+  ejemplo_es: texto(f.ejemplo_es),
+  truco: texto(f.truco),
 }));
 
 const sinId = vocabulario.filter((c) => c.id === null || !c.aleman);
@@ -108,6 +114,16 @@ writeFileSync(`${SALIDA}/vocabulario.json`, JSON.stringify(vocabulario));
 writeFileSync(`${SALIDA}/aktiv-passiv.json`, JSON.stringify(aktivPassiv));
 writeFileSync(`${SALIDA}/deklination.json`, JSON.stringify(deklination));
 writeFileSync(`${SALIDA}/verbos.json`, JSON.stringify(verbos));
+
+// ---- Categorías de las frases ----
+const categorias = (await filas('Categorias')).map((f) => ({
+  categoria: texto(f.categoria),
+  espanol: texto(f.espanol),
+  para_que: texto(f.para_que),
+  orden: numero(f.orden) ?? 999,
+}));
+writeFileSync(`${SALIDA}/categorias.json`, JSON.stringify(categorias));
+console.log(`Categorías: ${categorias.length}`);
 
 console.log(`Vocabulario: ${vocabulario.length} tarjetas`);
 console.log(`Aktiv-Passiv: ${aktivPassiv.length} filas`);

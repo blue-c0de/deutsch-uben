@@ -21,6 +21,13 @@ import { TIPO_SING, breakable, searchFold } from '../utils/text';
         <input id="buscar" class="input" type="search" [value]="query()" (input)="onQuery($event)" placeholder="Straße, calle, street…" autocomplete="off" />
       </div>
 
+      @if (material(); as m) {
+        <p class="aviso" role="status">
+          Estás viendo solo: <b>{{ m }}</b>.
+          <button type="button" class="linkbtn" (click)="verTodo()">Ver todo el vocabulario</button>
+        </p>
+      }
+
       <app-filters />
 
       <p class="muted" role="status">
@@ -50,6 +57,9 @@ import { TIPO_SING, breakable, searchFold } from '../utils/text';
               </div>
               <div class="side">
                 <span class="chip">{{ tipo(c) }}</span>
+                @if (c.tema) {
+                  <span class="chip">{{ c.tema }}</span>
+                }
                 @if (conjId(c); as vid) {
                   <a class="btn btn-quiet" routerLink="/verbos" [queryParams]="{ v: vid }">Conjugar</a>
                 }
@@ -71,6 +81,21 @@ import { TIPO_SING, breakable, searchFold } from '../utils/text';
     </div>
   `,
   styles: `
+    .aviso {
+      padding: 8px 12px;
+      border-left: 5px solid var(--mark);
+      background: var(--ink-soft);
+    }
+    .linkbtn {
+      font: inherit;
+      font-weight: 700;
+      color: var(--ink);
+      background: none;
+      border: 0;
+      padding: 0 0 0 6px;
+      cursor: pointer;
+      text-decoration: underline;
+    }
     .list {
       list-style: none;
       margin: 0;
@@ -174,6 +199,23 @@ export class Browse {
   protected readonly shown = computed(() => this.results().slice(0, this.limit()));
 
   protected readonly br = breakable;
+
+  /** Material elegido en «Juegos»; también limita lo que se ve aquí. */
+  protected readonly material = computed(() => {
+    const s = this.settings.state();
+    const partes: string[] = [];
+    if (s.fuente !== 'todas') {
+      if (s.leccion === 'todas') partes.push(s.fuente);
+      else partes.push(`${s.fuente}, módulo ${s.leccion.split('-')[0]}, página ${s.leccion.split('-')[1]}`);
+    }
+    if (s.tema !== 'todos') partes.push(`tema ${s.tema}`);
+    if (s.subtipo !== 'todos') partes.push(s.subtipo);
+    if (s.categoria !== 'todas') partes.push(`categoría ${s.categoria}`);
+    return partes.length ? partes.join(', ') : null;
+  });
+  protected verTodo(): void {
+    this.settings.patch({ fuente: 'todas', leccion: 'todas', tema: 'todos', subtipo: 'todos', categoria: 'todas' });
+  }
 
   protected conjId(c: Card): number | null {
     return c.tipo === 'verbo' ? (this.data.verbByVocabId().get(c.id)?.id ?? null) : null;

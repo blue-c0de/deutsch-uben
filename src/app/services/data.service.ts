@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { forkJoin } from 'rxjs';
-import { AktivPassivRow, Card, DeclRow, Verb } from '../models';
+import { AktivPassivRow, Card, Categoria, DeclRow, Verb } from '../models';
 
 @Injectable({ providedIn: 'root' })
 export class DataService {
@@ -11,6 +11,7 @@ export class DataService {
   readonly aktivPassiv = signal<AktivPassivRow[]>([]);
   readonly deklination = signal<DeclRow[]>([]);
   readonly verbs = signal<Verb[]>([]);
+  readonly categorias = signal<Categoria[]>([]);
   readonly status = signal<'cargando' | 'listo' | 'error'>('cargando');
 
   readonly byId = computed(() => new Map(this.cards().map((c) => [c.id, c])));
@@ -35,12 +36,14 @@ export class DataService {
       ap: this.http.get<AktivPassivRow[]>('data/aktiv-passiv.json'),
       decl: this.http.get<DeclRow[]>('data/deklination.json'),
       verbs: this.http.get<Verb[]>('data/verbos.json'),
+      cats: this.http.get<Categoria[]>('data/categorias.json'),
     }).subscribe({
-      next: ({ cards, ap, decl, verbs }) => {
+      next: ({ cards, ap, decl, verbs, cats }) => {
         this.cards.set(cards);
         this.aktivPassiv.set(ap);
         this.deklination.set(decl);
         this.verbs.set(verbs);
+        this.categorias.set(cats);
         this.status.set('listo');
       },
       error: () => this.status.set('error'),

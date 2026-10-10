@@ -18,6 +18,19 @@ export interface Card {
   seccion: string | null;
   nota: string | null;
   revisar: boolean;
+  tema: string | null;
+  subtipo: string | null; // género o tipo de verbo (separado por comas)
+  clave: string | null; // palabra que se oculta en el juego de huecos
+  ejemplo: string | null;
+  ejemplo_es: string | null;
+  truco: string | null;
+}
+
+export interface Categoria {
+  categoria: string;
+  espanol: string | null;
+  para_que: string | null;
+  orden: number;
 }
 
 /** Estado de repaso de una tarjeta (sistema de cajas Leitner). */
@@ -62,6 +75,10 @@ export interface Settings {
   autoSpeak: boolean;
   includeReview: boolean;
   theme: Theme;
+  leccion: string; // 'todas' o «módulo-página» (p. ej. 1-3)
+  tema: string; // 'todos' o un tema
+  subtipo: string; // 'todos' o una etiqueta (der, irregular, separable…)
+  categoria: string; // 'todas' o una categoría de frases
 }
 
 export interface SessionItem {

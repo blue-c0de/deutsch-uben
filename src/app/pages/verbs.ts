@@ -217,6 +217,9 @@ function inSource(v: Verb, s: Source): boolean {
                 }
               </select>
             </div>
+            @if (fuenteActiva(); as fa) {
+              <p class="muted small">Material elegido en Juegos: {{ fa }}. Se aplica a «Mis verbos», «Irregulares», «Separables» y «Reflexivos».</p>
+            }
             <button type="button" class="btn btn-primary" [disabled]="formChoices().length === 0 || pool().length === 0" (click)="startPractice()">Empezar</button>
             @if (pool().length === 0) {
               <p class="muted small">No hay verbos con ese filtro.</p>
@@ -648,7 +651,25 @@ export class Verbs {
   protected readonly okN = signal(0);
   protected readonly wrong = signal<Question[]>([]);
 
-  protected readonly pool = computed(() => this.data.verbs().filter((v) => inSource(v, this.pSource())));
+  protected readonly pool = computed(() => {
+    const s = this.settings.state();
+    const filtrar = s.fuente !== 'todas' && this.pSource() !== 'basicos';
+    const byId = this.data.byId();
+    const permitido = (v: Verb): boolean =>
+      !filtrar ||
+      (v.vocab_ids ?? '')
+        .split(',')
+        .filter(Boolean)
+        .some((id) => {
+          const c = byId.get(Number(id));
+          return !!c && c.fuente === s.fuente && (s.leccion === 'todas' || `${c.modulo}-${c.pagina}` === s.leccion);
+        });
+    return this.data.verbs().filter((v) => inSource(v, this.pSource()) && permitido(v));
+  });
+  protected readonly fuenteActiva = computed(() => {
+    const s = this.settings.state();
+    return s.fuente === 'todas' ? null : s.leccion === 'todas' ? s.fuente : `${s.fuente} (módulo ${s.leccion.split('-')[0]}, página ${s.leccion.split('-')[1]})`;
+  });
   protected readonly cur = computed(() => this.qs()[this.qi()] ?? null);
   protected readonly finished = computed(() => this.qs().length > 0 && this.qi() >= this.qs().length);
   protected readonly pct = computed(() => (this.qs().length ? Math.round((this.qi() / this.qs().length) * 100) : 0));
